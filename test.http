@@ -1,4 +1,29 @@
+# Request random string, default length
 POST http://localhost:3000/random-string
 Content-Type: application/json
 
 {}
+
+###
+# Request random string, custom length
+POST http://localhost:3000/random-string
+Content-Type: application/json
+
+{ "length": 10 }
+
+###
+# request random string, request too long
+POST http://localhost:3000/random-string
+Content-Type: application/json
+
+{ "length": 257 }
+
+###
+# Request patterned string
+POST http://localhost:3000/pattern-string
+Content-Type: application/json
+
+{
+    "pattern": "[A-L!?@]{12}.[m-z/'\"-]{10}"
+}
+

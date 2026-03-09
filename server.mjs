@@ -1,5 +1,5 @@
 import express from "express";
-import crypto from "crypto";
+import { alphaNumStr, strFromPattern } from './string_generator.mjs';
 
 const app = express();
 app.use(express.json());
@@ -9,21 +9,6 @@ const PORT = process.env.PORT || 3000;
 const DEFAULT_LENGTH = 16;
 const MAX_LENGTH = 256;
 
-// 26 upper + 26 lower + 10 digits = 62 characters
-const CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-/**
- * Generate a cryptographically secure random alphanumeric string.
- */
-function alphaNumStr(length = DEFAULT_LENGTH) {
-    let result = "";
-
-    for (let i = 0; i < length; i++) {
-        const idx = crypto.randomInt(0, CHARSET.length);
-        result += CHARSET[idx];
-    }
-    return result;
-}
 
 /**
  * POST /random-string
@@ -60,6 +45,32 @@ app.post("/random-string", (req, res) => {
     const randomString = alphaNumStr(length);
 
     return res.status(200).json({ randomString, length });
+});
+
+/**
+ * POST /pattern-string
+ * Req Body: { "pattern": "[A-Za-z0-9!@^_-]{12,16}" }
+ * Res Body: { "pattern_string": "..."}
+ */
+app.post('/pattern-string', (req, res) => {
+
+    const pattern = req.body?.pattern;
+
+    if (!pattern) {        
+        return res.status(400).json({
+            error: { code: "BAD_REQUEST", message: "request for patterned string must include a pattern" }
+        });
+    }
+
+    try {
+        const pattern_string = strFromPattern(pattern)
+        return res.status(200).json({ pattern_string })
+    } catch (err) {
+        return res.status(400).json({
+            error: { code: "BAD_REQUEST", message: err.message}
+        })
+    }
+
 });
 
 app.use((err, req, res, next) => {
