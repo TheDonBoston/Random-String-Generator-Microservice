@@ -453,3 +453,59 @@ Example:
   }
 }
 ```
+---
+
+## UML Diagram
+
+```mermaid
+classDiagram
+    class ClientProgram {
+        +Send POST /random-string
+        +Send POST /pattern-string
+    }
+
+    class Server {
+        +POST /random-string
+        +POST /pattern-string
+        +Error handler
+    }
+
+    class StringGenerator {
+        +alphaNumStr(length)
+        +strFromPattern(pattern)
+        +randomStr(charset, length)
+        +charsInRange(first_char, last_char)
+        +parseCharSet(pattern, start, end)
+        +charsValid(pattern)
+        +getQty(pattern, start, end)
+    }
+
+    ClientProgram --> Server : HTTP requests
+    Server --> StringGenerator : calls generator functions
+```
+
+### Request Flow
+
+```mermaid
+sequenceDiagram
+    participant Client as Client Program
+    participant Server as server.mjs
+    participant Generator as string_generator.mjs
+
+    Client->>Server: POST /random-string { "length": 16 }
+    Server->>Server: Validate request body
+    Server->>Generator: alphaNumStr(16)
+    Generator->>Generator: randomStr(AZ_NUM_CHARSET, 16)
+    Generator-->>Server: random string
+    Server-->>Client: JSON response
+
+    Client->>Server: POST /pattern-string { "pattern": "[A-Z]{3}[0-9]{3}" }
+    Server->>Server: Validate request body
+    Server->>Generator: strFromPattern(pattern)
+    Generator->>Generator: charsValid(pattern)
+    Generator->>Generator: parseCharSet(...)
+    Generator->>Generator: getQty(...)
+    Generator->>Generator: randomStr(...)
+    Generator-->>Server: generated pattern string
+    Server-->>Client: JSON response
+```
